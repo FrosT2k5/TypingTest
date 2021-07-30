@@ -136,8 +136,9 @@ def test():
 	while i < len(orig):
 		try:
 			if orig[i] != typ[i]:
-				print(Fore.RED,"Mistake: expected:",orig[i],", You typed: ",typ[i],Style.RESET_ALL)
-				mistakes += 1
+				if orig[i] != typ[i+1]:
+					print(Fore.RED,"Mistake: expected:",orig[i],"or",orig[i+1],", You typed: ",typ[i],Style.RESET_ALL)
+					mistakes += 1
 			else:
 				None
 		except IndexError:
