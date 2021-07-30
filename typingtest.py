@@ -168,12 +168,10 @@ def test():
 	name = conf["name"]
 	conf["score"] = wpm
 	bestscore = conf["bestscore"]
-	print(bestscore,wpm)
 	if wpm > bestscore:
 		print("Highscore!")
 		conf["bestscore"] = wpm
 
-	print(conf)
 	confile = open(".config.json","w")
 	json.dump(conf,confile,indent=6)
 	confile.close()
