@@ -2,16 +2,73 @@ import os
 import time
 from colorama import Fore,Style
 import json
+import requests
+from urllib.parse import unquote
+
+def leaderboards():
+	try:
+		txt = requests.get("http://quantumbyteofficial.000webhostapp.com/QuantumDrive/FrosT/scorelog.txt").text
+	except:
+		print(f"{Fore.RED}Failed to get leaderboards list, please check your internet connection{Style.RESET_ALL}")
+		input()
+		return 0
+
+	txtfile = open(".scores.txt","w")
+	txtfile.write(txt)
+	txtfile.close()
+
+	txtfile = open(".scores.txt","r")
+	lines = txtfile.read().splitlines()
+	txtfile.close()
+
+	clr()
+	scoredict = {}
+	for line in lines:
+		if "," in line:
+			scr = line.split(",",1)
+			nam = unquote(scr[0])
+			try:
+				score = int(scr[1])
+			except: #Don't break if a line is incorrect by mistake...
+				None 
+			scoredict[nam] = score
+		else:
+			None
+	
+	scorelist = sorted(scoredict.items(),reverse=True,key=lambda kv:(kv[1]))
+	x = 0
+
+	print(Fore.YELLOW,"Top 15 Typers of FrosT's TypingTest!")
+	print(Fore.GREEN,"Congratulations to all the fast typers\nScore is in WPM(Words Per Minute)\n\n\n",Style.RESET_ALL)
+
+	while x<=15:	
+		try:
+			print(f' -  {scorelist[x][0]} - {scorelist[x][1]} WPM!')
+			time.sleep(0.2)
+		except IndexError:
+			break
+		x+=1
+
+	print("\n\n")
+	input()
 
 def config():
 	if os.path.isfile(".config.json"):
 		print(Fore.RED,"Previously saved config found!, overwriting",Style.RESET_ALL)
+		f = open(".config.json",'r')
+		co = json.load(f)
+		bestscore = co['bestscore']
+		score = co['score']
+		f.close()
+
 	else:
-		None
+		bestscore = 0
+		score = 0
 	name = input("Enter your name: ")
 	conf ={
 		"name": name,
-		"bestscore": 0
+		"bestscore": bestscore,
+		'score': score
 	}
 
 	confile = open(".config.json","w")
@@ -121,8 +178,17 @@ def test():
 	confile.close()
 
 	ck = input(f"{Fore.BLUE}Do you want to submit your score in leaderboards?{Style.RESET_ALL}(Y/n)")
+	if wpm >= 230:
+		print(Fore.RED,"Looks like you cheated! If u didn't then contact me @FrosT2k5",Style.RESET_ALL)
+		ck = "n"
+		input()
 	if ck == "y" or ck == "Y":
-		print("Coming Soon!")
+		try:
+			n = requests.get(f"http://quantumbyteofficial.000webhostapp.com/QuantumDrive/FrosT/index.php?{name},{wpm}")
+		except:
+			print(Fore.RED,"Please check your internet connection...",Style.RESET_ALL)
+			input()
+	leaderboards()
 	exit()
 
 if __name__=="__main__":
@@ -136,7 +202,8 @@ if __name__=="__main__":
 2 - See leaderboards
 3 - Edit/Create your name configuration 
 4 - Credits Section
-5 - Quit
+5 - Check/Submit your best score
+6 - Quit
 			""")
 
 		inp = input(f"{Fore.YELLOW}[COMMAND] : {Style.RESET_ALL}")
@@ -144,7 +211,7 @@ if __name__=="__main__":
 			clr()
 			test()
 		if inp == "2":
-			print("Coming SOON!")
+			leaderboards()
 		if inp == "3":
 			config()
 		if inp == "4":
@@ -157,4 +224,30 @@ if __name__=="__main__":
 			print("Telegram, Github- @QuantumByteStudios")
 			input()
 		if inp == "5":
+			if not os.path.isfile('.config.json'):
+				print(Fore.RED,'Configuration not found, please generate it!',Style.RESET_ALL)
+				input()
+				continue
+			with open(".config.json") as fil:
+				conf = json.load(fil)
+				name = conf['name']
+				bs = conf['bestscore']
+				score = conf['score']
+			print('\n\nYour Name:',name)
+			print('Your Best Score:',bs)
+			print('Your last score:',score)
+			chk = input(f"{Fore.YELLOW}Submit your best score to leaderboards?(Y/n): {Style.RESET_ALL}")
+			if chk == 'Y' or chk == 'y':
+				if bs <= 230:
+					print('Submitting...')
+					try:
+						n = requests.get(f"http://quantumbyteofficial.000webhostapp.com/QuantumDrive/FrosT/index.php?{name},{bs}")
+					except:
+						print(Fore.RED,"Please check your internet connection...",Style.RESET_ALL)
+				else:
+					print(Fore.RED,"Looks like your score is above 230!, if your didn't cheat, drop me a message...@FrosT2k5",Style.RESET_ALL)
+				input()
+			else:
+				input()
+		if inp == "6":
 			exit()
