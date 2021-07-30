@@ -1,3 +1,6 @@
+*.spec
+build/
 .config*
 .score*
 dist/
+__pycache__
