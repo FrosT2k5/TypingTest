@@ -98,9 +98,9 @@ def test():
 
 	print(f"{Fore.YELLOW}You took total {time_taken} seconds to type the paragraph")
 	print(f"{Fore.YELLOW}So your typing speed is around: {wpm} words per minute!{Style.RESET_ALL}")
-	print(f"{Fore.GREEN}\nSaving your score...")
+	print(f"{Fore.GREEN}\nSaving your score...{Style.RESET_ALL}")
 	if not os.path.isfile(".config.json"):
-		print(f"{Fore.RED}No local config found, generating...")
+		print(f"{Fore.RED}No local config found, generating...{Style.RESET_ALL}")
 		config()
 	
 	confile = open(".config.json",'r')
