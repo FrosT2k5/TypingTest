@@ -150,11 +150,11 @@ if __name__=="__main__":
 		if inp == "4":
 			print("Coded by FrosT2k5")
 			print("GitHub, Telegram: @FrosT2k5")
-			print("Instagram: @yash_patil2k5\n\n")
-			print("Leaderboards database and code by @Vissu01")
-			print("Telegram: @Vissu01")
-			print("@QuantumByteStudios, making difficulty levels and alternative way of leaderboards")
-			print("Telegram, Githu b- @QuantumByteStudios")
+			print("Instagram: @yash_patil2k5\n")
+			print("Leaderboards database by @Vissu01")
+			print("Telegram: @Vissu01\n")
+			print("@QuantumByteStudios, making difficulty levels and leaderboards server")
+			print("Telegram, Github- @QuantumByteStudios")
 			input()
 		if inp == "5":
 			exit()
