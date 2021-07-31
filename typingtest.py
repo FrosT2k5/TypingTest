@@ -121,7 +121,11 @@ def test():
 		time.sleep(1)
 	clr()
 
-	print(para)
+	if os.path.isfile("/data/data/com.termux/files/usr/bin/termux-info"):
+		print(pararaw) #Print paragraph directly for termux users,easier to read
+		print("\n\n")
+	else:
+		print(para)
 
 	StartTime = time.perf_counter()
 	inp = input("Enter the above paragraph below! Note that paragraph doesn't have newline!. Press enter only if you are done!:\n\n")
