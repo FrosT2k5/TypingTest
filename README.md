@@ -12,7 +12,7 @@ For Linux/Termux users -
 - ```python3 typingtest.py```
 
 # Credits:
-Thanks to @QuantumByteStudios for backend of leaderboards<br>
+Thanks to <a href="https://github.com/QuantumByteStudios">@QuantumByteStudios</a> for backend of leaderboards<br>
 And thanks to you all for using my TypingTest :)<br>
 
 Made with ♥️ by FrosT2k5 & QuantumByteStudios
