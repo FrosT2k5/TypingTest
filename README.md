@@ -1,6 +1,11 @@
-# TypingTest
-<b>Master your typing skills with this <a href="https://www.python.org/">Python</a> program😉</b>
-<br><br><img src="Images/icon.png" width="250px">
+<h1> TypingTest </h1><br>
+
+<p align="center">
+  <b>Master your typing skills with this <a href="https://www.python.org/">Python</a> program😉</b>
+  <br><br><img src="Images/icon.png" width="250px">
+</p>
+
+
 
 # Installation
 For windows users, check the <a href="https://github.com/FrosT2k5/TypingTest/releases">releases</a> section of this repo<br>
