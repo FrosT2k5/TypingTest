@@ -1,13 +1,17 @@
-import os
+import curses
+from curses import wrapper
 import time
 from colorama import Fore,Style
 import json
 import requests
 from urllib.parse import unquote
+from os.path import isfile
+import os
 
+#This function fetches and prints leaderboards
 def leaderboards():
 	try:
-		txt = requests.get("http://quantumbyteofficial.000webhostapp.com/QuantumDrive/FrosT/scorelog.txt").text
+		txt = requests.get("http://frost2k5.000webhostapp.com/scorelog.txt").text
 	except:
 		print(f"{Fore.RED}Failed to get leaderboards list, please check your internet connection{Style.RESET_ALL}")
 		input()
@@ -48,12 +52,12 @@ def leaderboards():
 		except IndexError:
 			break
 		x+=1
-
-	print("\n\n")
 	input()
 
+
+#This function is used to setup configuration
 def config():
-	if os.path.isfile(".config.json"):
+	if isfile(".config.json"):
 		print(Fore.RED,"Previously saved config found!, overwriting",Style.RESET_ALL)
 		f = open(".config.json",'r')
 		co = json.load(f)
@@ -75,6 +79,7 @@ def config():
 	json.dump(conf,confile,indent="    ")
 	confile.close()
 
+# Clear screen
 def clr():
     time.sleep(0.2)
     if os.name == 'nt':
@@ -82,7 +87,184 @@ def clr():
     else:
         os.system('clear')
 
-clr()
+def qslice(string,ind):
+	#This function slices the given string into 50 characters with ind as index of the sliced string
+ 	st = []
+ 	for i in range(0,len(string),49):
+ 		st.append(string[i:i+49]) #Split string to list sl which has 49 characters in each element
+ 	try:
+ 		print(len(st[1]))
+ 		return st[ind]
+ 	except IndexError:
+ 		return None
+
+#Result function
+def result(spd,mistakes):
+	curses.endwin()
+	if not isfile(".config.json"):
+		print(f"{Fore.RED}No local config found, generating...{Style.RESET_ALL}")
+		config()
+
+
+	print(f"\n\n{Fore.GREEN}Your speed is: {spd}WPM! \n Your mistakes: {mistakes} \n {Fore.RED}Each mistake reduces 0.5 second of your speed",Style.RESET_ALL)
+	spd = round(spd - 0.5*mistakes)
+	print(Fore.BLUE,f"So, your actual speed is: {spd}",Style.RESET_ALL)
+	confile = open(".config.json",'r')
+	conf = json.load(confile)
+	confile.close()
+
+	name = conf["name"]
+	conf["score"] = spd
+	bestscore = conf["bestscore"]
+	if spd > bestscore:
+		print("Highscore!")
+		conf["bestscore"] = spd
+
+	confile = open(".config.json","w")
+	json.dump(conf,confile,indent=6)
+	confile.close()
+
+	ck = input(f"{Fore.BLUE}Do you want to submit your score in leaderboards?{Style.RESET_ALL}(Y/n)")
+	if spd >= 230:
+		print(Fore.RED,"Looks like you cheated! If u didn't then contact me @FrosT2k5",Style.RESET_ALL)
+		ck = "n"
+		input()
+	if ck == "y" or ck == "Y":
+		try:
+			n = requests.get(f"http://frost2k5.000webhostapp.com/leaderboards.php?{name},{spd}")
+		except:
+			print(Fore.RED,"Please check your internet connection...",Style.RESET_ALL)
+			input()
+	leaderboards()
+
+def main(stdsrc):
+	stdsrc.clear()
+
+	#Colors
+	curses.init_pair(1,curses.COLOR_BLUE, curses.COLOR_BLACK)
+	curses.init_pair(2,curses.COLOR_GREEN, curses.COLOR_BLACK)
+	curses.init_pair(3,curses.COLOR_RED, curses.COLOR_BLACK)
+	curses.init_pair(4,curses.COLOR_YELLOW, curses.COLOR_BLACK)
+	blue = curses.color_pair(1)
+	green = curses.color_pair(2)
+	red = curses.color_pair(3)
+	yellow = curses.color_pair(4)
+
+
+	# Get center co-ordinates of the display screen
+	y = curses.LINES // 2
+	x = curses.COLS // 2
+
+	# Initialize windows
+	q = curses.newwin(7,50,y,x-25) #This will print the query 
+	txt = curses.newwin(1,50,y+1,x-25) #User will type here
+	counters = curses.newwin(3,15,2,x-25) #This will print the statistics(mistakes and speed)
+	#warns = curses.newwin(1,100,15,20) #This will contain debugging text or warning
+
+	# This function updates the user input window txt according to qslice
+	def updatetxt(str):
+		txt.clear()
+		txt.addstr(0,0,str)
+		txt.move(0,0)
+		txt.refresh()
+
+
+	# Same as updatetxt, but updates for the user query window,q
+	def updateq(str,str2,str3):
+		q.clear()
+		q.addstr(0,0,str,blue)
+		try:
+			q.addstr(3,0,str2,yellow)
+			q.addstr(5,0,str3,yellow)
+		except TypeError: #Don't crash if it's end of the question string
+			None
+		q.refresh()
+
+
+	# Print counters
+	counters.addstr(0,0,"Wrong: 0",blue)
+	counters.addstr(2,0,"Speed: 0WPM",blue)
+	counters.refresh()
+
+	#The question string
+	easy = "A quick brown fox jumps over the lazy dog. Far far away, behind the word mountains, far from the countries Vokalia and Consonantia there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean."
+
+	
+	# Initialize the First string slice
+	sl = 0 # Index of string qslice
+	# Get the first slice of question
+	query = qslice(easy,0)
+	sl += 1 # We got the first slice
+	updateq(query,qslice(easy,sl),qslice(easy,sl+1)) #Get next and +2 string of query to print below the user input
+	updatetxt(query)
+	
+
+	i = 0 # It's probably some loop coz i :p
+	which = 1 # Stores which text index of query is going on
+	inp = [] #List of words user entered
+	stime = time.perf_counter()
+	while True:
+		txt.refresh()
+		key = txt.getkey() #Get user input
+
+		if ord(key) == 127: #Back Key
+			i -= 1
+			key = ""
+			txt.addstr(0,i,key)
+			inp.pop() #Remove the last character
+
+		elif ord(key) in (10,13): #Enter and arrow keys
+			None
+
+		else: #Process the input
+			try:
+				if query[i] == key:
+					txt.addstr(0,i,key,green) #Green if user input is right
+					i += 1
+				else:
+					txt.addstr(0,i,key,red) #Red if user input is wrong
+					i += 1
+				inp.append(key) #Append the character user entered
+			except IndexError: #IndexError means question ended
+				stdsrc.clear() #Clear for normal output next to this
+				result(spd,mistakes)
+				break
+				# String Slice handler
+
+		# After every iteration, update Speed and Mistakes:
+		st = "" #Make string from the inp list
+		mistakes = 0 # Start with 0 Mistakes
+		cind = 0 # Custom index which will hold absolute index number
+		for j in inp:
+			if j != easy[cind]:
+				mistakes += 1
+			cind +=	1
+			st += j
+		newinp = st.split(" ") #Split string into set of words
+		ctime = time.perf_counter() #Get current time
+		tneeded = ctime - stime #Calculate time needed
+
+		spd = round(len(newinp)/tneeded*60) #Some math that I dont know about
+
+		#print it all out
+		counters.clear()
+		counters.addstr(0,0,f"Wrong: {mistakes}",blue)
+		counters.addstr(2,0,f"Speed: {spd}WPM",blue)
+		counters.refresh()
+
+		if txt.getyx()[1] == 49: #Get the x coordinate of text, if it's 49 then print the next slice of string
+			query = qslice(easy,sl)
+			updateq(query,qslice(easy,sl+1),qslice(easy,sl+2))
+			sl += 1 # Increase by 1 for next iteration
+			updatetxt(query)
+			i = 0 #Go to the first character input after string slice
+			#j = 0 #For mistake counter 
+
+
+	txt.getch()
+
+
+# Begin the actual program
 
 head = """
 		╔════╗─────────────╔════╦═══╦═══╗╔╗
@@ -93,109 +275,10 @@ head = """
 		──╚╝╚═╗╔╣╔═╩╩╝╚╩═╗║──╚╝─╚═══╩═══╝╚═╝
 		────╔═╝║║║─────╔═╝║
 		────╚══╝╚╝─────╚══╝
+		By: @FrosT2k5
 	"""
 
-def test():
-	pararaw = "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean. A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth. Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life."
-	para = """
-			Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, 
-			there live the blind texts. Separated they live in Bookmarksgrove right at the coast 
-			of the Semantics, a large language ocean. A small river named Duden flows by their 
-			place and supplies it with the necessary regelialia. It is a paradisematic country, 
-			in which roasted parts of sentences fly into your mouth. Even the all-powerful 
-			Pointing has no control about the blind texts it is an almost unorthographic life. 
-			"""
-
-	print(head)
-	print("Welcome to Typing Test Program")
-	print("By",Fore.GREEN,"@FrosT2k5, @QuantumByteStudios and @Vissu01",Style.RESET_ALL)
-
-	print(Fore.RED,"\n\nNOTE:")
-	print(Style.RESET_ALL)
-	print("You will be given a paragraph of 100 words\nYou have to type it as fast as possible\nEach Mistake adds +5 seconds to your typing speed\nNOTE that paragraph doesn't have newlines!")
-	input("\nPress Enter to continue:")
-	print("\n")
-
-	for i in (3,2,1):
-		print(f"{Fore.GREEN}The test will begin in {i} seconds, get ready!{Style.RESET_ALL}",end="\r")
-		time.sleep(1)
-	clr()
-
-	if os.path.isfile("/data/data/com.termux/files/usr/bin/termux-info"):
-		print(pararaw) #Print paragraph directly for termux users,easier to read
-		print("\n\n")
-	else:
-		print(para)
-
-	StartTime = time.perf_counter()
-	inp = input("Enter the above paragraph below! Note that paragraph doesn't have newline!. Press enter only if you are done!:\n\n")
-	print("\n\n")
-	EndTime = time.perf_counter()
-
-	orig = pararaw.split(" ")
-	typ = inp.split(" ")
-	mistakes = 0
-	i = 0
-
-	while i < len(orig):
-		try:
-			if orig[i] != typ[i]:
-				if orig[i] != typ[i+1]:
-					print(Fore.RED,"Mistake: expected:",orig[i],"or",orig[i+1],", You typed: ",typ[i],Style.RESET_ALL)
-					mistakes += 1
-			else:
-				None
-		except IndexError:
-			mistakes += 1
-		i+=1
-
-	print(Fore.GREEN,"Total number of mistakes: ",mistakes,Style.RESET_ALL)
-	print("\n")
-
-
-	time_taken = EndTime - StartTime
-	penalty = mistakes*5
-	time_taken = time_taken + penalty
-	wpm = round(len(orig)*60/time_taken)
-
-	print(f"{Fore.YELLOW}You took total {time_taken} seconds to type the paragraph")
-	print(f"{Fore.YELLOW}So your typing speed is around: {wpm} words per minute!{Style.RESET_ALL}")
-	print(f"{Fore.GREEN}\nSaving your score...{Style.RESET_ALL}")
-	if not os.path.isfile(".config.json"):
-		print(f"{Fore.RED}No local config found, generating...{Style.RESET_ALL}")
-		config()
-	
-	confile = open(".config.json",'r')
-	conf = json.load(confile)
-	confile.close()
-
-	name = conf["name"]
-	conf["score"] = wpm
-	bestscore = conf["bestscore"]
-	if wpm > bestscore:
-		print("Highscore!")
-		conf["bestscore"] = wpm
-
-	confile = open(".config.json","w")
-	json.dump(conf,confile,indent=6)
-	confile.close()
-
-	ck = input(f"{Fore.BLUE}Do you want to submit your score in leaderboards?{Style.RESET_ALL}(Y/n)")
-	if wpm >= 230:
-		print(Fore.RED,"Looks like you cheated! If u didn't then contact me @FrosT2k5",Style.RESET_ALL)
-		ck = "n"
-		input()
-	if ck == "y" or ck == "Y":
-		try:
-			n = requests.get(f"http://quantumbyteofficial.000webhostapp.com/QuantumDrive/FrosT/index.php?{name},{wpm}")
-		except:
-			print(Fore.RED,"Please check your internet connection...",Style.RESET_ALL)
-			input()
-	leaderboards()
-	exit()
-
-if __name__=="__main__":
-	while True:
+while True:
 		clr()
 		print(head)
 		print("Welcome to Typing test program")
@@ -212,18 +295,20 @@ if __name__=="__main__":
 		inp = input(f"{Fore.YELLOW}[COMMAND] : {Style.RESET_ALL}")
 		if inp == "1":
 			clr()
-			test()
+			print(Fore.RED,f"READ CAREFULLY!{Style.RESET_ALL}\n\nAs soon as you press enter,\ntimer will start in background\nType everything properly with minimal errors\nGood Luck :) !!\n\nPress enter to start!\nDo not resize your terminal between the test...\nPress space key once you typed everything to finish the test")
+			input()
+			wrapper(main)
 		if inp == "2":
 			leaderboards()
 		if inp == "3":
 			config()
+			print("Done!")
+			input()
 		if inp == "4":
 			print("Coded by FrosT2k5")
 			print("GitHub, Telegram: @FrosT2k5")
 			print("Instagram: @yash_patil2k5\n")
-			print("Leaderboards database by @Vissu01")
-			print("Telegram: @Vissu01\n")
-			print("@QuantumByteStudios, making difficulty levels and leaderboards server")
+			print("@QuantumByteStudios, for making leaderboards server")
 			print("Telegram, Github- @QuantumByteStudios")
 			input()
 		if inp == "5":
@@ -244,7 +329,7 @@ if __name__=="__main__":
 				if bs <= 230:
 					print('Submitting...')
 					try:
-						n = requests.get(f"http://quantumbyteofficial.000webhostapp.com/QuantumDrive/FrosT/index.php?{name},{bs}")
+						n = requests.get(f"http://frost2k5.000webhostapp.com/leaderboards.php?{name},{bs}")
 					except:
 						print(Fore.RED,"Please check your internet connection...",Style.RESET_ALL)
 				else:
