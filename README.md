@@ -6,6 +6,7 @@
 </p>
 
 
+<br>
 
 # Installation
 For windows users, check the <a href="https://github.com/FrosT2k5/TypingTest/releases">releases</a> section of this repo<br>
@@ -16,12 +17,14 @@ For Linux/Termux users -
 - ```pip3 install -r requirements.txt```
 - ```python3 typingtest.py```
 
+<br><br>
 # ScreenShots
 <img src="Images/ss2.png" width=600px>
 <img src="Images/ss1.png" width=475px>
 <img src="Images/ss3.png" width=475px>
 
-<br><br>
+<br>
+
 # Credits:
 Thanks to <a href="https://github.com/QuantumByteStudios">@QuantumByteStudios</a> for backend of leaderboards<br>
 And thanks to you all for using my TypingTest :)<br>
