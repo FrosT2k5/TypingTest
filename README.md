@@ -11,11 +11,22 @@
 # Installation
 For windows users, check the <a href="https://github.com/FrosT2k5/TypingTest/releases">releases</a> section of this repo<br>
 For Linux/Termux users -
-- Install python and pip for your distro
-- ```git clone https://github.com/FrosT2k5/TypingTest```
-- ```cd TypingTest```
-- ```pip3 install -r requirements.txt```
-- ```python3 typingtest.py```
+Install python and pip for your distro
+ ```
+git clone https://github.com/FrosT2k5/TypingTest
+```
+
+```
+cd TypingTest
+```
+
+```
+pip3 install -r requirements.txt
+```
+
+```
+python3 typingtest.py
+```
 
 <br><br>
 # ScreenShots
