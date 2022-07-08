@@ -264,78 +264,149 @@ def main(stdsrc):
 	txt.getch()
 
 
-# Begin the actual program
 
-head = """
-		╔════╗─────────────╔════╦═══╦═══╗╔╗
-		║╔╗╔╗║─────────────║╔╗╔╗║╔══╣╔═╗╠╝╚╗
-		╚╝║║╠╣─╔╦══╦╦═╗╔══╗╚╝║║╚╣╚══╣╚══╬╗╔╝
-		──║║║║─║║╔╗╠╣╔╗╣╔╗║──║║─║╔══╩══╗║║║
-		──║║║╚═╝║╚╝║║║║║╚╝║──║║─║╚══╣╚═╝║║╚╗
-		──╚╝╚═╗╔╣╔═╩╩╝╚╩═╗║──╚╝─╚═══╩═══╝╚═╝
-		────╔═╝║║║─────╔═╝║
-		────╚══╝╚╝─────╚══╝
-		By: @FrosT2k5
-	"""
+# Main menu
+menuitems = []
+def menu(stdsrc):
 
-while True:
-		clr()
-		print(head)
-		print("Welcome to Typing test program")
-		print(Fore.GREEN,"\nPlease enter one of the following options - ")
-		print("""
-1 - Take a typing test (Medium mode, easy and difficult coming soon!)
-2 - See leaderboards
-3 - Edit/Create your name configuration 
-4 - Credits Section
-5 - Check/Submit your best score
-6 - Quit
-			""")
 
-		inp = input(f"{Fore.YELLOW}[COMMAND] : {Style.RESET_ALL}")
-		if inp == "1":
-			clr()
-			print(Fore.RED,f"READ CAREFULLY!{Style.RESET_ALL}\n\nAs soon as you press enter,\ntimer will start in background\nType everything properly with minimal errors\nGood Luck :) !!\n\nPress enter to start!\nDo not resize your terminal between the test...\nPress space key once you typed everything to finish the test")
-			input()
-			wrapper(main)
-		if inp == "2":
-			leaderboards()
-		if inp == "3":
-			config()
-			print("Done!")
-			input()
-		if inp == "4":
-			print("Coded by FrosT2k5")
-			print("GitHub, Telegram: @FrosT2k5")
-			print("Instagram: @yash_patil2k5\n")
-			print("@QuantumByteStudios, for making leaderboards server")
-			print("Telegram, Github- @QuantumByteStudios")
-			input()
-		if inp == "5":
-			if not os.path.isfile('.config.json'):
-				print(Fore.RED,'Configuration not found, please generate it!',Style.RESET_ALL)
-				input()
-				continue
-			with open(".config.json") as fil:
-				conf = json.load(fil)
-				name = conf['name']
-				bs = conf['bestscore']
-				score = conf['score']
-			print('\n\nYour Name:',name)
-			print('Your Best Score:',bs)
-			print('Your last score:',score)
-			chk = input(f"{Fore.YELLOW}Submit your best score to leaderboards?(Y/n): {Style.RESET_ALL}")
-			if chk == 'Y' or chk == 'y':
-				if bs <= 230:
-					print('Submitting...')
-					try:
-						n = requests.get(f"http://frost2k5.000webhostapp.com/leaderboards.php?{name},{bs}")
-					except:
-						print(Fore.RED,"Please check your internet connection...",Style.RESET_ALL)
-				else:
-					print(Fore.RED,"Looks like your score is above 230!, if your didn't cheat, drop me a message...@FrosT2k5",Style.RESET_ALL)
-				input()
+	#Colors
+	curses.init_pair(8,curses.COLOR_BLUE, curses.COLOR_BLACK)
+	curses.init_pair(9,curses.COLOR_GREEN, curses.COLOR_BLACK)
+	curses.init_pair(10,curses.COLOR_RED, curses.COLOR_BLACK)
+	curses.init_pair(11,curses.COLOR_YELLOW, curses.COLOR_BLACK)
+	curses.init_pair(12,curses.COLOR_BLACK, curses.COLOR_BLUE)
+	blue = curses.color_pair(8)
+	green = curses.color_pair(9)
+	red = curses.color_pair(10)
+	yellow = curses.color_pair(11)
+
+	stdsrc.clear()
+
+	head = """╔════╗─────────────╔════╦═══╦═══╗╔╗
+║╔╗╔╗║─────────────║╔╗╔╗║╔══╣╔═╗╠╝╚╗
+╚╝║║╠╣─╔╦══╦╦═╗╔══╗╚╝║║╚╣╚══╣╚══╬╗╔╝
+──║║║║─║║╔╗╠╣╔╗╣╔╗║──║║─║╔══╩══╗║║║
+──║║║╚═╝║╚╝║║║║║╚╝║──║║─║╚══╣╚═╝║║╚╗
+──╚╝╚═╗╔╣╔═╩╩╝╚╩═╗║──╚╝─╚═══╩═══╝╚═╝
+────╔═╝║║║─────╔═╝║
+────╚══╝╚╝─────╚══╝
+By: @FrosT2k5"""
+
+
+	# Get center co-ordinates of the display screen
+	y = curses.LINES // 2 - 4
+	x = curses.COLS // 2
+	logo = curses.newwin(9,38,2,x-19)
+	itemwin = curses.newwin(8,40,y+4,x-18)
+	logo.addstr(0,0,head,blue)
+	logo.refresh()
+
+	#print info
+	#itemwin.addstr(0,0,"Welcome to FrosT's Typing Test Program",green)
+	itemwin.keypad(True)
+
+	def printmenu(selitem):
+		#print all menu items
+		i = 0
+		sel = curses.color_pair(12)
+		for item in menuitems:
+			if i == selitem:
+				itemwin.addstr(i,0,item,sel) #Print selected item with sel color combo
 			else:
-				input()
-		if inp == "6":
+				itemwin.addstr(i,0,item)
+			i += 1
+			itemwin.refresh()
+
+	printmenu(0)
+	curses.noecho()	
+
+
+	inpnum = 0
+	while True:
+		inp = itemwin.getkey()
+		if inp == "KEY_DOWN" or inp == "S" or inp == "s":
+			inpnum += 1
+			inpnum = 5 if inpnum > 5 else inpnum #Dont let inpnum go above 6
+			printmenu(selitem=inpnum)
+
+		elif inp == "KEY_UP" or inp == "W" or inp == "w":
+			inpnum -= 1
+			inpnum = 0 if inpnum < 0 else inpnum #Dont let inpnum go above 1
+			printmenu(selitem=inpnum)
+
+		elif inp == "Q" or inp == "q":
+			curses.echo()
+			curses.endwin()
 			exit()
+
+		elif ord(inp) == 10:
+			curses.endwin()
+			return inpnum
+
+
+
+# function to choose options based on inpnum returned by menu function
+def menufunc(inp):
+	if inp == 0:
+		clr()
+		print(Fore.RED,f"\n\nREAD CAREFULLY!{Style.RESET_ALL}\n\nAs soon as you press enter,\ntimer will start in background\nType everything properly with minimal errors\nGood Luck :) !!\n\nPress enter to start!\nDo not resize your terminal between the test...\nPress space key once you typed everything to finish the test")
+		input()
+		wrapper(main)
+	if inp == 1:
+		leaderboards()
+	if inp == 2:
+		config()
+		print("Done!")
+		input()
+	if inp == 3:
+		print("Coded by FrosT2k5")
+		print("GitHub, Telegram: @FrosT2k5")
+		print("Instagram: @yash_patil2k5\n")
+		print("@QuantumByteStudios, for making leaderboards server")
+		print("Telegram, Github- @QuantumByteStudios")
+		input()
+	if inp == 4:
+		if not os.path.isfile('.config.json'):
+			print(Fore.RED,'Configuration not found, please generate it!',Style.RESET_ALL)
+			input()
+		with open(".config.json") as fil:
+			conf = json.load(fil)
+			name = conf['name']
+			bs = conf['bestscore']
+			score = conf['score']
+		print('\n\nYour Name:',name)
+		print('Your Best Score:',bs)
+		print('Your last score:',score)
+		chk = input(f"{Fore.YELLOW}Submit your best score to leaderboards?(Y/n): {Style.RESET_ALL}")
+		if chk == 'Y' or chk == 'y':
+			if bs <= 230:
+				print('Submitting...')
+				try:
+					n = requests.get(f"http://frost2k5.000webhostapp.com/leaderboards.php?{name},{bs}")
+				except:
+					print(Fore.RED,"Please check your internet connection...",Style.RESET_ALL)
+			else:
+				print(Fore.RED,"Looks like your score is above 230!, if your didn't cheat, drop me a message...@FrosT2k5",Style.RESET_ALL)
+			input()
+		else:
+			input()
+	if inp == 5:
+		curses.endwin()
+		exit()
+
+
+# Start the actual program
+# Add available menu items
+menuitems.append("1 - Take a typing test (easy mode)")
+menuitems.append("2 - See leaderboards              ")
+menuitems.append("3 - Edit/Create your name config  ")
+menuitems.append("4 - Credits Section               ")
+menuitems.append("5 - Check/Submit your best score  ")
+menuitems.append("6 - Quit (or press q)             ")
+
+# Begin main loop
+while True:
+	clr()
+	userinpt = wrapper(menu)
+	menufunc(userinpt)
