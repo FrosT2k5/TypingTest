@@ -87,6 +87,13 @@ def clr():
     else:
         os.system('clear')
 
+# Check input, using this instead of ord directly prevents crashing on changing resolution
+def checkkey(key):
+	try:
+		return ord(key)
+	except TypeError:
+		return None
+
 def qslice(string,ind):
 	#This function slices the given string into 50 characters with ind as index of the sliced string
  	st = []
@@ -207,13 +214,13 @@ def main(stdsrc):
 		txt.refresh()
 		key = txt.getkey() #Get user input
 
-		if ord(key) == 127: #Back Key
+		if checkkey(key) == 127: #Back Key
 			i -= 1
 			key = ""
 			txt.addstr(0,i,key)
 			inp.pop() #Remove the last character
 
-		elif ord(key) in (10,13): #Enter and arrow keys
+		elif checkkey(key) in (10,13): #Enter and arrow keys
 			None
 
 		else: #Process the input
@@ -340,7 +347,7 @@ By: @FrosT2k5"""
 			curses.endwin()
 			exit()
 
-		elif ord(inp) == 10:
+		elif checkkey(inp) == 10:
 			curses.endwin()
 			return inpnum
 
