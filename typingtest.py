@@ -11,7 +11,7 @@ import os
 #This function fetches and prints leaderboards
 def leaderboards():
 	try:
-		txt = requests.get("http://frost2k5.000webhostapp.com/scorelog.txt").text
+		txt = requests.get("http://frost.alwaysdata.net/scorelog.txt").text
 	except:
 		print(f"{Fore.RED}Failed to get leaderboards list, please check your internet connection{Style.RESET_ALL}")
 		input()
@@ -138,7 +138,7 @@ def result(spd,mistakes):
 		input()
 	if ck == "y" or ck == "Y":
 		try:
-			n = requests.get(f"http://frost2k5.000webhostapp.com/leaderboards.php?{name},{spd}")
+			n = requests.get(f"http://frost.alwaysdata.net/leaderboards.php?{name},{spd}")
 		except:
 			print(Fore.RED,"Please check your internet connection...",Style.RESET_ALL)
 			input()
@@ -390,7 +390,7 @@ def menufunc(inp):
 			if bs <= 230:
 				print('Submitting...')
 				try:
-					n = requests.get(f"http://frost2k5.000webhostapp.com/leaderboards.php?{name},{bs}")
+					n = requests.get(f"http://frost.alwaysdata.net/leaderboards.php?{name},{bs}")
 				except:
 					print(Fore.RED,"Please check your internet connection...",Style.RESET_ALL)
 			else:
